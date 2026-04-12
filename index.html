@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bistro Kuwait | Premium Dining</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">BISTRO<span>KW</span></div>
+        <div class="cart-trigger" onclick="toggleCart()">
+            <i class="fas fa-shopping-bag"></i>
+            <span id="cart-badge">0</span>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Authentic Flavors</h1>
+            <p>Direct to your door via WhatsApp</p>
+            <a href="#menu-anchor" class="btn">Order Now</a>
+        </div>
+    </section>
+
+    <div id="menu-anchor"></div>
+    <main class="container">
+        <div class="search-container">
+            <input type="text" id="menu-search" placeholder="Search..." oninput="handleSearch()">
+        </div>
+
+        <div class="categories">
+            <button class="cat-btn active" onclick="filterMenu('all', this)">All Items</button>
+            <button class="cat-btn" onclick="filterMenu('Main', this)">Main Course</button>
+            <button class="cat-btn" onclick="filterMenu('Sides', this)">Sides & Salads</button>
+            <button class="cat-btn" onclick="filterMenu('Drinks', this)">Beverages</button>
+        </div>
+
+        <div id="menu-grid" class="menu-grid">
+            <div class="loader-text">Loading delicious food...</div>
+        </div>
+        <div id="menu-display"></div>
+    </main>
+
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Selection</h3>
+            <i class="fas fa-times close-cart" onclick="toggleCart()"></i>
+        </div>
+
+        <div id="cart-items" class="cart-items-list">
+        </div>
+
+        <div class="cart-summary">
+            <div class="summary-line">
+                <span>Subtotal</span>
+                <span id="subtotal">0.000 KWD</span>
+            </div>
+            <div class="summary-line">
+                <span>Delivery</span>
+                <span id="delivery-fee">1.000 KWD</span>
+            </div>
+            <div class="summary-line total">
+                <span>Total</span>
+                <span id="grand-total">1.000 KWD</span>
+            </div>
+
+            <div class="customer-info">
+                <input type="text" id="cust-name" placeholder="Your Name" required>
+                <input type="text" id="cust-address" placeholder="Area, Block, Street, House" required>
+            </div>
+
+            <button class="whatsapp-btn" onclick="sendToWhatsApp()">
+                <i class="fab fa-whatsapp"></i> Order on WhatsApp
+            </button>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
