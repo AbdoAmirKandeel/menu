@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Batch Media & Vector Converter</title>
+    <link rel="icon" href="Mango-modified.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* HEADER STYLES */
+        header {
+            width: 100%;
+            background-color: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span { color: #f1f5f9; }
+        
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 16px;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: #38bdf8; }
+
+        /* MAIN CONTENT AREA */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 40px 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            border: 1px solid #334155;
+        }
+        h2 {
+            margin: 0 0 8px 0;
+            color: #38bdf8;
+            font-size: 1.6rem;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        label {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        select {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        select:focus { border-color: #38bdf8; }
+        
+        .drop-zone {
+            border: 2px dashed #38bdf8;
+            border-radius: 8px;
+            padding: 28px 16px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #0f172a40;
+            transition: background-color 0.2s, border-color 0.2s;
+            margin: 16px 0;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            background-color: #38bdf815;
+            border-color: #7dd3fc;
+        }
+        .drop-zone span {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        input[type="file"] { display: none; }
+        
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .list-title {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        .clear-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+        }
+        .clear-btn:hover { text-decoration: underline; }
+
+        .file-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background-color: #0f172a;
+            margin-bottom: 20px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #1e293b;
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 85%;
+        }
+        .original-name {
+            color: #94a3b8;
+            max-width: 35%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .arrow { color: #64748b; font-weight: bold; }
+        .new-name {
+            color: #38bdf8;
+            font-weight: 600;
+            max-width: 40%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .status-tag {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #334155;
+            color: #94a3b8;
+        }
+        .status-tag.done { background-color: #10b981; color: #ffffff; }
+        .status-tag.working { background-color: #f59e0b; color: #ffffff; }
+        .status-tag.error { background-color: #ef4444; color: #ffffff; }
+
+        .remove-file {
+            color: #64748b;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0 4px;
+        }
+        .remove-file:hover { color: #ef4444; }
+
+        button.action-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+        button.action-btn:hover { background-color: #0369a1; }
+        button.action-btn:disabled {
+            background-color: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        /* FOOTER STYLES */
+        footer {
+            width: 100%;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+            padding: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        footer a {
+            color: #f59e0b;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo"><span><img src="Mango-modified.png" alt="Mango Logo" height="50" width="50"></span></div>
+    <nav>
+        <a href="https://www.buymeacoffee.com/bodeamirk2a" target="_blank"><img src="https://img.buymeacoffee.com/button-api/?text=Donate&emoji=&slug=bodeamirk2a&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
+    </nav>
+</header>
+
+<main>
+    <div class="container">
+        <h2>Smart Batch Media Converter</h2>
+        <p class="subtitle">Convert images, vector graphics, video containers, and audio files locally in your browser.</p>
+
+        <div class="grid">
+            <div class="form-group">
+                <label for="mediaCategory">1. Media Category</label>
+                <select id="mediaCategory">
+                    <option value="image">Image & Vector (PNG, SVG, JPG, WEBP, AVIF...)</option>
+                    <option value="video">Video Containers (MP4, WEBM, MKV, AVI, MOV...)</option>
+                    <option value="audio">Audio Files (MP3, WAV, OGG, M4A, AAC, FLAC...)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="extSelect">2. Target Format</label>
+                <select id="extSelect"></select>
+            </div>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            Drag & drop multiple files here or <span>browse</span>
+            <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+
+        <div id="queueContainer" style="display: none;">
+            <div class="list-header">
+                <span class="list-title" id="fileCount">Selected Files (0)</span>
+                <button class="clear-btn" id="clearBtn">Clear All</button>
+            </div>
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <button class="action-btn" id="processBtn" disabled>Convert & Download Files</button>
+    </div>
+</main>
+
+<footer>
+    &copy; 2026 <a href="https://mangocompany.infinityfreeapp.com/" target="_blank">Mango Copyrights</a>. All rights reserved.
+</footer>
+
+<script>
+    const mediaCategory = document.getElementById('mediaCategory');
+    const extSelect = document.getElementById('extSelect');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const queueContainer = document.getElementById('queueContainer');
+    const fileList = document.getElementById('fileList');
+    const fileCount = document.getElementById('fileCount');
+    const clearBtn = document.getElementById('clearBtn');
+    const processBtn = document.getElementById('processBtn');
+
+    // Expanded preset options per media category
+    const presets = {
+        image: {
+            accept: "image/*,.png,.jpg,.jpeg,.webp,.bmp,.gif,.ico,.avif,.tiff,.tif",
+            options: [
+                { value: "svg", label: "Convert to .svg (Scalable Vector Graphics)" },
+                { value: "png", label: "Convert to .png (Portable Network Graphics)" },
+                { value: "jpg", label: "Convert to .jpg (JPEG Image)" },
+                { value: "webp", label: "Convert to .webp (WebP Image)" },
+                { value: "avif", label: "Convert to .avif (AV1 Image Format)" },
+                { value: "bmp", label: "Convert to .bmp (Bitmap)" },
+                { value: "gif", label: "Convert to .gif (Graphics Interchange Format)" },
+                { value: "ico", label: "Convert to .ico (Favicon Icon)" }
+            ]
+        },
+        video: {
+            accept: "video/*,.mkv,.avi,.mov,.mp4,.webm,.flv,.3gp,.ogv,.ts",
+            options: [
+                { value: "mp4", label: "Convert Container to .mp4 (MPEG-4)" },
+                { value: "webm", label: "Convert Container to .webm (WebM)" },
+                { value: "mkv", label: "Convert Container to .mkv (Matroska)" },
+                { value: "mov", label: "Convert Container to .mov (QuickTime)" },
+                { value: "avi", label: "Convert Container to .avi (Audio Video Interleave)" },
+                { value: "flv", label: "Convert Container to .flv (Flash Video)" },
+                { value: "3gp", label: "Convert Container to .3gp (3GPP)" },
+                { value: "ogv", label: "Convert Container to .ogv (Ogg Video)" },
+                { value: "ts", label: "Convert Container to .ts (MPEG Transport Stream)" }
+            ]
+        },
+        audio: {
+            accept: "audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac,.opus,.webm",
+            options: [
+                { value: "mp3", label: "Convert Container to .mp3 (MPEG Audio)" },
+                { value: "wav", label: "Convert to .wav (PCM Audio)" },
+                { value: "ogg", label: "Convert Container to .ogg (Ogg Vorbis)" },
+                { value: "m4a", label: "Convert Container to .m4a (MPEG-4 Audio)" },
+                { value: "aac", label: "Convert Container to .aac (Advanced Audio Coding)" },
+                { value: "flac", label: "Convert Container to .flac (Free Lossless Audio Codec)" },
+                { value: "opus", label: "Convert Container to .opus (Opus Audio)" },
+                { value: "webm", label: "Convert Container to .webm (WebM Audio)" }
+            ]
+        }
+    };
+
+    let loadedFiles = [];
+
+    function updateExtensionDropdown() {
+        const cat = mediaCategory.value;
+        const data = presets[cat];
+
+        fileInput.setAttribute('accept', data.accept);
+        extSelect.innerHTML = '';
+
+        data.options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.value;
+            el.textContent = opt.label;
+            extSelect.appendChild(el);
+        });
+
+        updatePreview();
+    }
+
+    mediaCategory.addEventListener('change', updateExtensionDropdown);
+    extSelect.addEventListener('change', updatePreview);
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+        addFiles(e.target.files);
+        fileInput.value = '';
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    ['dragleave', 'dragend'].forEach(type => {
+        dropZone.addEventListener(type, () => dropZone.classList.remove('dragover'));
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            addFiles(e.dataTransfer.files);
+        }
+    });
+
+    function addFiles(newFiles) {
+        const fileArray = Array.from(newFiles);
+        loadedFiles = [...loadedFiles, ...fileArray.map(f => ({ file: f, status: 'ready' }))];
+        updatePreview();
+    }
+
+    function removeFile(index) {
+        loadedFiles.splice(index, 1);
+        updatePreview();
+    }
+
+    clearBtn.addEventListener('click', () => {
+        loadedFiles = [];
+        updatePreview();
+    });
+
+    function updatePreview() {
+        if (loadedFiles.length === 0) {
+            queueContainer.style.display = 'none';
+            processBtn.disabled = true;
+            return;
+        }
+
+        queueContainer.style.display = 'block';
+        fileList.innerHTML = '';
+        processBtn.disabled = false;
+        fileCount.textContent = `Selected Files (${loadedFiles.length})`;
+
+        const cleanExt = extSelect.value;
+
+        loadedFiles.forEach((item, index) => {
+            const file = item.file;
+            const lastDot = file.name.lastIndexOf('.');
+            const baseName = lastDot !== -1 ? file.name.substring(0, lastDot) : file.name;
+            const newFilename = `${baseName}.${cleanExt}`;
+
+            const row = document.createElement('div');
+            row.className = 'file-item';
+            row.innerHTML = `
+                <div class="file-info">
+                    <span class="original-name" title="${file.name}">${file.name}</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="new-name" title="${newFilename}">${newFilename}</span>
+                    <span class="status-tag ${item.status}" id="status-${index}">${item.status.toUpperCase()}</span>
+                </div>
+                <span class="remove-file" title="Remove file" onclick="removeFile(${index})">&times;</span>
+            `;
+            fileList.appendChild(row);
+        });
+    }
+
+    // Vector SVG conversion logic
+    function convertToSVG(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const width = img.width;
+                const height = img.height;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64 = e.target.result;
+                    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+                        <image width="${width}" height="${height}" xlink:href="${base64}" />
+                    </svg>`;
+                    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                    resolve(blob);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // Raster Image conversion
+    function convertRasterImage(file, targetFormat) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                if (targetFormat === 'ico') {
+                    width = 32;
+                    height = 32;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                let mimeType = `image/${targetFormat}`;
+                if (targetFormat === 'jpg') mimeType = 'image/jpeg';
+                if (targetFormat === 'ico') mimeType = 'image/x-icon';
+                
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Raster conversion failed'));
+                }, mimeType, 0.95);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // Audio & Video Container Stream Convert
+    function convertMediaContainer(file, targetFormat, category) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let mimeType = category === 'video' ? `video/${targetFormat}` : `audio/${targetFormat}`;
+                
+                // Specific MIME mappings for optimal browser handling
+                const mimeMap = {
+                    'mp3': 'audio/mpeg',
+                    'wav': 'audio/wav',
+                    'ogg': category === 'video' ? 'video/ogg' : 'audio/ogg',
+                    'm4a': 'audio/mp4',
+                    'aac': 'audio/aac',
+                    'flac': 'audio/flac',
+                    'opus': 'audio/opus',
+                    'mp4': 'video/mp4',
+                    'webm': category === 'video' ? 'video/webm' : 'audio/webm',
+                    'mkv': 'video/x-matroska',
+                    'mov': 'video/quicktime',
+                    'avi': 'video/x-msvideo',
+                    'flv': 'video/x-flv',
+                    '3gp': 'video/3gpp',
+                    'ts': 'video/mp2t'
+                };
+
+                if (mimeMap[targetFormat]) {
+                    mimeType = mimeMap[targetFormat];
+                }
+                
+                const blob = new Blob([e.target.result], { type: mimeType });
+                resolve(blob);
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // Process Batch Queue
+    processBtn.addEventListener('click', async () => {
+        processBtn.disabled = true;
+        const targetExt = extSelect.value;
+        const category = mediaCategory.value;
+
+        for (let i = 0; i < loadedFiles.length; i++) {
+            const item = loadedFiles[i];
+            const file = item.file;
+            const statusTag = document.getElementById(`status-${i}`);
+            
+            if (statusTag) {
+                statusTag.textContent = "CONVERTING...";
+                statusTag.className = "status-tag working";
+            }
+
+            const lastDot = file.name.lastIndexOf('.');
+            const baseName = lastDot !== -1 ? file.name.substring(0, lastDot) : file.name;
+            const outputName = `${baseName}.${targetExt}`;
+
+            let outputBlob;
+
+            try {
+                if (category === 'image') {
+                    if (targetExt === 'svg') {
+                        outputBlob = await convertToSVG(file);
+                    } else {
+                        outputBlob = await convertRasterImage(file, targetExt);
+                    }
+                } else {
+                    outputBlob = await convertMediaContainer(file, targetExt, category);
+                }
+
+                // Trigger direct file download
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(outputBlob);
+                a.download = outputName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                if (statusTag) {
+                    statusTag.textContent = "DONE";
+                    statusTag.className = "status-tag done";
+                }
+            } catch (err) {
+                console.error(err);
+                if (statusTag) {
+                    statusTag.textContent = "ERROR";
+                    statusTag.className = "status-tag error";
+                }
+            }
+        }
+
+        processBtn.disabled = false;
+        processBtn.textContent = "Convert & Download Files";
+    });
+
+    updateExtensionDropdown();
+</script>
+
+</body>
+</html>
